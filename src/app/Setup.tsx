@@ -18,6 +18,8 @@ const PERMISSIONS = [
 
 type Stage = 'token' | 'owner' | 'install'
 
+/** The next name to try when one is taken: gild → gild-2 → gild-3. */
+const nextName = (name: string) => { const m = name.match(/^(.*)-(\d+)$/); return m ? `${m[1]}-${Number(m[2]) + 1}` : `${name}-2` }
 const slug = (name: string | null) => (name ?? '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 39)
 
 export function Setup({ onInstalled }: { onInstalled(instance: Instance): void }) {
@@ -49,14 +51,16 @@ export function Setup({ onInstalled }: { onInstalled(instance: Instance): void }
     } finally { setBusy(false) }
   }
 
-  async function run(e?: React.FormEvent) {
+  async function run(e?: React.FormEvent, as?: string) {
     e?.preventDefault()
-    if (!me?.public_key) return
+    const worker = as ?? slug(name)
+    if (!me?.public_key || !worker) return
+    if (as) setName(as)
     setStage('install'); setBusy(true); setError(''); setSteps({})
     try {
       const t = await template()
       const done = await install({
-        token: token.trim(), accountId: account, name, fetch: httpFetch, template: t,
+        token: token.trim(), accountId: account, name: worker, fetch: httpFetch, template: t,
         owner: { name: owner, email, publicKey: me.public_key },
         onProgress: p => setSteps(s => ({ ...s, [p.step]: p })),
       })
@@ -122,12 +126,12 @@ export function Setup({ onInstalled }: { onInstalled(instance: Instance): void }
           <details className="advanced" open={name !== 'gild' || /another name/.test(error) || undefined}>
             <summary className="dim small">Advanced</summary>
             <label htmlFor="name">Worker name</label>
-            <input id="name" value={name} onChange={e => setName(slug(e.target.value) || 'gild')} />
+            <input id="name" value={name} onChange={e => setName(e.target.value.toLowerCase())} onBlur={() => setName(n => slug(n) || 'gild')} />
             <p className="dim small">Names the Worker and prefixes its databases, bucket and queues. One install per name.</p>
           </details>
           <div className="row">
             <button type="button" className="ghost" onClick={() => setStage('token')}>Back</button>
-            <button className="primary" disabled={!owner || !email || !name || !me?.public_key}>Install gild</button>
+            <button className="primary" disabled={!owner || !email || !slug(name) || !me?.public_key}>Install gild</button>
           </div>
         </form>
       )}
@@ -151,7 +155,9 @@ export function Setup({ onInstalled }: { onInstalled(instance: Instance): void }
             <p className="error" role="alert">{error}</p>
             <div className="row">
               <button className="ghost" onClick={() => setStage('owner')}>{/another name/.test(error) ? 'Choose a name' : 'Back'}</button>
-              <button className="primary" onClick={() => run()} disabled={busy}>Try again</button>
+              {/another name/.test(error)
+                ? <button className="primary" onClick={() => run(undefined, nextName(slug(name)))} disabled={busy}>Install as {nextName(slug(name))}</button>
+                : <button className="primary" onClick={() => run()} disabled={busy}>Try again</button>}
             </div>
             <p className="dim small">Running it again picks up where it stopped; nothing is created twice.</p>
           </>)}

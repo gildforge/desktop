@@ -118,3 +118,7 @@ label { display: block; font-size: 12px; color: var(--ink-dim); margin: 14px 0 6
 .side > .error { padding: 4px 14px; margin: 0; }
 .block { white-space: pre-wrap; word-break: break-all; }
 .tree li.dim { padding: 7px 12px; }
+.requests { border-top: 1px solid var(--rule); padding-bottom: 6px; }
+.requests .pad { padding: 2px 14px; margin: 0; overflow-wrap: anywhere; }
+.request { display: flex; flex-direction: column; gap: 3px; margin: 4px 8px; padding: 8px 10px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; }
+.request .row { margin-top: 4px; }

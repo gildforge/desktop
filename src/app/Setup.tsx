@@ -3,7 +3,7 @@
 // account (the kit's installer, step by step), and they become its owner.
 import { useEffect, useState } from 'react'
 import { accounts, install, STEPS, type Account, type Progress, type StepId } from '@gildforge/kit/install/index'
-import { httpFetch, identity, openExternal, writeInstance, type Identity, type Instance } from '@/lib/platform'
+import { createIdentity, httpFetch, identity, openExternal, writeInstance, type Identity, type Instance } from '@/lib/platform'
 import { template } from '@/lib/template'
 
 const PERMISSIONS = [
@@ -34,7 +34,7 @@ export function Setup({ onInstalled }: { onInstalled(instance: Instance): void }
   const [error, setError] = useState('')
 
   useEffect(() => {
-    identity().then(id => { setMe(id); setOwner(o => o || slug(id.name)); setEmail(e => e || (id.email ?? '')) }, () => {})
+    identity().then(id => { setMe(id); setOwner(o => o || slug(id.gild_name ?? id.name)); setEmail(e => e || (id.email ?? '')) }, () => {})
   }, [])
 
   async function checkToken(e: React.FormEvent) {
@@ -111,11 +111,14 @@ export function Setup({ onInstalled }: { onInstalled(instance: Instance): void }
           <input id="owner" value={owner} onChange={e => setOwner(slug(e.target.value))} placeholder="sami" />
           <label htmlFor="email">Email</label>
           <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
-          <label>SSH key</label>
+          <label>Your gild key</label>
           {me?.public_key
-            ? <code className="key" title={me.key_path}>{me.public_key.split(' ').slice(0, 2).join(' ').slice(0, 64)}…</code>
-            : <p className="error">No key at {me?.key_path ?? '~/.ssh/id_ed25519.pub'}. Run <code>ssh-keygen -t ed25519</code>, then come back.</p>}
-          <p className="dim small">gild knows you by this key: the CLI signs in with it, and agents you add are sponsored by it.</p>
+            ? <code className="key" title={me.key_path}>{me.public_key}</code>
+            : <div className="row">
+                <span className="dim small">No gild identity on this machine yet.</span>
+                <button type="button" className="ghost small" onClick={async () => { try { setMe(await createIdentity(owner)) } catch (err) { setError(String(err)) } }}>Create one</button>
+              </div>}
+          <p className="dim small">gild knows you by this key, the same one the <code>gild</code> CLI signs in with ({me?.key_path ?? '~/.config/gild/identity.json'}). Agents you approve are sponsored by it.</p>
           <details className="advanced" open={name !== 'gild' || /another name/.test(error) || undefined}>
             <summary className="dim small">Advanced</summary>
             <label htmlFor="name">Worker name</label>

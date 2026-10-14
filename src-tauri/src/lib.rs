@@ -7,6 +7,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             local::identity,
+            local::identity_create,
             local::instance_read,
             local::instance_write,
             local::instance_forget,

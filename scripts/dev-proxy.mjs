@@ -10,7 +10,7 @@ import { WebSocketServer, WebSocket } from 'ws'
 
 const PORT = 1431
 const INSTANCE = process.env.GILD_DEV_INSTANCE ?? '.tmp/instance.json'
-const KEY = process.env.GILD_DEV_KEY ?? `${homedir()}/.ssh/id_ed25519.pub`
+const IDENTITY = process.env.GILD_DEV_IDENTITY ?? `${homedir()}/.config/gild/identity.json`
 const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*', 'access-control-expose-headers': '*' }
 const git = key => { try { return execFileSync('git', ['config', '--global', key], { encoding: 'utf8' }).trim() || null } catch { return null } }
 const read = path => { try { return readFileSync(path, 'utf8') } catch { return null } }
@@ -20,7 +20,10 @@ const server = createServer(async (req, res) => {
   if (req.method === 'OPTIONS') return res.writeHead(204, cors).end()
   const body = await new Promise(resolve => { const chunks = []; req.on('data', c => chunks.push(c)); req.on('end', () => resolve(Buffer.concat(chunks))) })
   const json = value => res.writeHead(200, { ...cors, 'content-type': 'application/json' }).end(JSON.stringify(value))
-  if (url.pathname === '/identity') return json({ name: git('user.name'), email: git('user.email'), public_key: read(KEY)?.trim() ?? null, key_path: KEY })
+  if (url.pathname === '/identity') {
+    const id = JSON.parse(read(IDENTITY) ?? 'null')
+    return json({ name: git('user.name'), email: git('user.email'), public_key: id?.publicKey ?? null, gild_name: id?.name ?? null, key_path: IDENTITY })
+  }
   if (url.pathname === '/instance') {
     if (req.method === 'PUT') { mkdirSync('.tmp', { recursive: true }); writeFileSync(INSTANCE, body, { mode: 0o600 }); return json(null) }
     if (req.method === 'DELETE') { rmSync(INSTANCE, { force: true }); return json(null) }

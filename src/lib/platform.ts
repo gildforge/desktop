@@ -52,7 +52,7 @@ export async function openExternal(url: string) {
   window.open(url, '_blank', 'noopener')
 }
 
-export interface Identity { name: string | null; email: string | null; public_key: string | null; key_path: string }
+export interface Identity { name: string | null; email: string | null; public_key: string | null; gild_name: string | null; key_path: string }
 
 export interface Instance { url: string; owner: string; token: string; account_id: string; name: string; version: string }
 
@@ -65,6 +65,8 @@ async function invoke<T>(command: string, args?: Record<string, unknown>): Promi
 const dev = async <T,>(path: string, init?: RequestInit): Promise<T> => (await fetch(`${PROXY}${path}`, init)).json() as Promise<T>
 
 export const identity = () => (inTauri() ? invoke<Identity>('identity') : dev<Identity>('/identity'))
+/** Make a gild identity (as `gild auth init` would) on a machine without one. */
+export const createIdentity = (name: string) => (inTauri() ? invoke<Identity>('identity_create', { name }) : dev<Identity>('/identity', { method: 'POST', body: JSON.stringify({ name }) }))
 export const readInstance = () => (inTauri() ? invoke<Instance | null>('instance_read') : dev<Instance | null>('/instance'))
 export const writeInstance = (instance: Instance) =>
   inTauri() ? invoke<void>('instance_write', { instance }) : dev<void>('/instance', { method: 'PUT', body: JSON.stringify(instance) })

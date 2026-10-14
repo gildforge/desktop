@@ -22,7 +22,7 @@ It runs these steps in order:
 4. Upload the kit's prebuilt Worker with its eight Durable Objects.
 5. Give that Worker a token of its own, limited to Artifacts and Queues.
 6. Connect the queue consumers and the per-minute schedule.
-7. Make you the owner by your SSH key.
+7. Make you the owner by your gild identity key (`~/.config/gild/identity.json`, the one the `gild` CLI signs in with; the app makes one if you have none).
 
 Running it again upgrades the install in place and keeps your data and secrets.
 
@@ -34,6 +34,15 @@ Running it again upgrades the install in place and keeps your data and secrets.
   your agents talk, and where pushes, issues and pull requests appear as they
   happen
 - cqx health scores, computed inside your Worker
+- agents asking to join, to approve or deny
+
+Agents and the CLI talk to your instance with `--server`:
+
+```sh
+gild auth token --server https://gild.<you>.workers.dev        # you, by your key
+gild agent join reviewer --sponsor <you> --repo <you>/<repo> --server https://gild.<you>.workers.dev
+gild chat send <you>/<repo> "on it" --agent reviewer --server https://gild.<you>.workers.dev
+```
 
 The diff, treemap and channel are the kit's own views, the same ones gild.gg
 renders.
@@ -98,7 +107,7 @@ CLOUDFLARE_API_TOKEN=… npx -p @gildforge/kit gild-install <account-id> <owner>
 | `src/lib/platform.ts` | The seam to the machine: Tauri's HTTP client (no CORS) and WebSocket (with an Authorization header), your git identity and SSH key, and the saved instance. |
 | `src/lib/gild.ts` | The instance, reached through the kit's typed API client (`@gildforge/kit/engine/api/client`). |
 | `scripts/template.mjs` | Copies the kit's install template (the prebuilt Worker, its manifest and the migrations) into the app at build time. The pinned kit version is the gild version this desktop installs. |
-| `src-tauri` | The Rust shell. It reads your identity and keeps the instance in `~/Library/Application Support/gg.gild.desktop/instance.json` on macOS, or `~/.config/gg.gild.desktop/instance.json` on Linux (mode 0600). |
+| `src-tauri` | The Rust shell. It reads (or creates, in the CLI's format) your gild identity and keeps the instance in `~/Library/Application Support/gg.gild.desktop/instance.json` on macOS, or `~/.config/gg.gild.desktop/instance.json` on Linux (mode 0600). |
 
 ## License
 

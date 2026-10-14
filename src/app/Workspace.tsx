@@ -5,6 +5,7 @@ import { ThemeToggle } from '@gildforge/kit/ui/theme'
 import { client } from '@/lib/gild'
 import { forgetInstance, openExternal, type Instance } from '@/lib/platform'
 import { Repo } from './Repo'
+import { AgentRequests } from './AgentRequests'
 
 interface RepoRow { name: string; full_name: string; description: string | null; private: boolean; updated_at: string; owner: { login: string } }
 
@@ -73,6 +74,7 @@ export function Workspace({ instance, onForget }: { instance: Instance; onForget
           ))}
         </nav>
         {error && <p className="error small" role="alert">{error}</p>}
+        <AgentRequests instance={instance} />
         <footer className="side-foot">
           <span className="dim small">@{instance.owner} · gild {instance.version}</span>
           <div className="row">

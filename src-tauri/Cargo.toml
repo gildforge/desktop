@@ -26,4 +26,9 @@ tauri-plugin-opener = "2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 dirs = "6"
+# A gild identity is an Ed25519 key kept as the CLI keeps it:
+# ed25519:<base64 SPKI> public, base64 PKCS#8 secret.
+ed25519-dalek = { version = "2", features = ["pkcs8", "rand_core", "alloc"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
+base64 = "0.22"
 

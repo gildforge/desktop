@@ -16,6 +16,7 @@ export function Workspace({ instance, onForget }: { instance: Instance; onForget
   const [creating, setCreating] = useState(false)
   const [name, setName] = useState('')
   const [error, setError] = useState('')
+  const [leaving, setLeaving] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -79,7 +80,9 @@ export function Workspace({ instance, onForget }: { instance: Instance; onForget
           <span className="dim small">@{instance.owner} · gild {instance.version}</span>
           <div className="row">
             <ThemeToggle />
-            <button className="ghost small" onClick={async () => { if (confirm('Forget this instance on this machine? It keeps running in your Cloudflare account.')) { await forgetInstance(); onForget() } }}>Disconnect</button>
+            {leaving
+              ? <button className="ghost small" title="Forget this instance on this machine. It keeps running in your Cloudflare account." onClick={async () => { await forgetInstance(); onForget() }} onBlur={() => setLeaving(false)} autoFocus>Forget it here?</button>
+              : <button className="ghost small" onClick={() => setLeaving(true)}>Disconnect</button>}
           </div>
         </footer>
       </aside>

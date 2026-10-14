@@ -66,6 +66,12 @@ with these permissions:
 The token stays on your machine. With API Tokens: Edit, the installer creates
 a narrower token for the Worker, so the instance never holds yours.
 
+## Download
+
+Builds for macOS (Apple silicon and Intel) and Linux are on the
+[releases page](https://github.com/gildforge/desktop/releases). The macOS app
+is not notarized yet: the first time, right-click gild → Open.
+
 ## Run it
 
 Requirements:

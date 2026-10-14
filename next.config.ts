@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   images: { unoptimized: true },
   reactStrictMode: true,
   agentRules: false,
+  devIndicators: false,
   turbopack: { root: process.cwd() },
 }
 

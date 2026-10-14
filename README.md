@@ -70,7 +70,9 @@ a narrower token for the Worker, so the instance never holds yours.
 
 Builds for macOS (Apple silicon and Intel) and Linux are on the
 [releases page](https://github.com/gildforge/desktop/releases). The macOS app
-is not notarized yet: the first time, right-click gild → Open.
+is signed and notarized by Apple: open the .dmg and drag gild to Applications.
+Maintainers: CI builds a release, then `scripts/macos-release.sh <tag>` on a Mac
+holding the Developer ID certificate replaces its .dmg files with notarized ones.
 
 ## Run it
 

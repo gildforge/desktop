@@ -23,7 +23,7 @@ interface Entry { type: 'file' | 'dir' | 'symlink' | 'submodule'; name: string; 
 interface File extends Entry { content?: string; encoding?: string }
 interface CommitRow { sha: string; commit: { message: string; author: { name: string; date: string } } }
 interface PullRow { number: number; title: string; state: string; user: { login: string }; head: { ref: string }; base: { ref: string }; created_at: string; merged_at?: string | null }
-interface Health { lines: number; scores: Record<string, number> }
+interface Health { lines: number; scores: Record<string, number> | null }
 
 /** Retry the reads an instance answers 503 to while it prepares them. */
 async function prepared<T>(read: () => Promise<T>, tries = 8): Promise<T> {
@@ -78,14 +78,15 @@ export function Repo({ instance, fullName }: { instance: Instance; fullName: str
 
 function useRead<T>(instance: Instance, path: string | null) {
   const [data, setData] = useState<T | null>(null)
+  const [loaded, setLoaded] = useState(false)
   const [error, setError] = useState('')
   const load = useCallback(() => {
     if (!path) return
     setError('')
-    prepared(() => get<T>(instance, path)).then(setData, e => setError((e as Error).message))
+    prepared(() => get<T>(instance, path)).then(d => { setData(d); setLoaded(true) }, e => setError((e as Error).message))
   }, [instance, path])
-  useEffect(() => { setData(null); load() }, [load])
-  return { data, error, reload: load }
+  useEffect(() => { setData(null); setLoaded(false); load() }, [load])
+  return { data, loaded, error, reload: load }
 }
 
 function Code({ instance, base }: { instance: Instance; base: string }) {
@@ -217,17 +218,21 @@ function ChangeView({ instance, path, title, onBack }: { instance: Instance; pat
 const CATEGORIES = ['quality', 'containment', 'legibility', 'security', 'modularity']
 
 function HealthView({ instance, base }: { instance: Instance; base: string }) {
-  const { data, error, reload } = useRead<Health>(instance, `${base}/health`)
+  const { data, loaded, error, reload } = useRead<Health>(instance, `${base}/health`)
   if (error) return <Problem message={error} retry={reload} />
-  if (!data) return <p className="dim">Scoring with cqx…</p>
+  if (!loaded) return <p className="dim">Scoring with cqx…</p>
+  // null: nothing cqx reads (only docs, config, assets). No scores yet: cqx is still running.
+  if (!data) return <p className="dim">Nothing to score yet. cqx reads code in 13 languages, among them Rust, TypeScript, Go, Python and Swift; push some and the scores appear here.</p>
+  if (!data.scores) return <p className="dim">cqx is still scoring this repository. Check back in a minute. <button className="link" onClick={reload}>Refresh</button></p>
+  const scores = data.scores
   return (
     <section className="health">
       <p className="dim small">cqx, run inside your Worker, over {data.lines.toLocaleString()} lines</p>
       {CATEGORIES.map(c => (
         <div key={c} className="bar">
           <span>{c}</span>
-          <span className="track"><span className="fill" style={{ width: `${data.scores[c] ?? 0}%` }} /></span>
-          <span className="num">{Math.round(data.scores[c] ?? 0)}</span>
+          <span className="track"><span className="fill" style={{ width: `${scores[c] ?? 0}%` }} /></span>
+          <span className="num">{Math.round(scores[c] ?? 0)}</span>
         </div>
       ))}
     </section>

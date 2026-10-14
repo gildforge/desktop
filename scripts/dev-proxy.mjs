@@ -3,8 +3,8 @@
 // calls without CORS, and answers identity/instance from this machine, with
 // the instance kept in .tmp/instance.json. Listens on localhost:1431 only.
 import { createServer } from 'node:http'
-import { execFileSync } from 'node:child_process'
-import { readFileSync, writeFileSync, rmSync, mkdirSync } from 'node:fs'
+import { execFileSync, spawnSync } from 'node:child_process'
+import { readFileSync, writeFileSync, rmSync, mkdirSync, openSync, closeSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { WebSocketServer, WebSocket } from 'ws'
 
@@ -23,6 +23,14 @@ const server = createServer(async (req, res) => {
   if (url.pathname === '/identity') {
     const id = JSON.parse(read(IDENTITY) ?? 'null')
     return json({ name: git('user.name'), email: git('user.email'), public_key: id?.publicKey ?? null, gild_name: id?.name ?? null, key_path: IDENTITY })
+  }
+  if (url.pathname === '/vm') {
+    if (process.platform === 'linux') { let kvm = false; try { closeSync(openSync('/dev/kvm', 'r+')); kvm = true } catch {} return json({ backend: 'firecracker', ready: kvm, found: kvm ? 'KVM (/dev/kvm)' : null }) }
+    for (const bin of ['/usr/local/bin/multipass', '/opt/homebrew/bin/multipass', 'multipass']) {
+      const r = spawnSync(bin, ['version'], { encoding: 'utf8' })
+      if (r.status === 0) return json({ backend: 'multipass', ready: true, found: r.stdout.split('\n')[0].split(/\s+/).join(' ') })
+    }
+    return json({ backend: 'multipass', ready: false, found: null })
   }
   if (url.pathname === '/instance') {
     if (req.method === 'PUT') { mkdirSync('.tmp', { recursive: true }); writeFileSync(INSTANCE, body, { mode: 0o600 }); return json(null) }

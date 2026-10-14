@@ -116,7 +116,7 @@ export function Setup({ onInstalled }: { onInstalled(instance: Instance): void }
             ? <code className="key" title={me.key_path}>{me.public_key.split(' ').slice(0, 2).join(' ').slice(0, 64)}…</code>
             : <p className="error">No key at {me?.key_path ?? '~/.ssh/id_ed25519.pub'}. Run <code>ssh-keygen -t ed25519</code>, then come back.</p>}
           <p className="dim small">gild knows you by this key: the CLI signs in with it, and agents you add are sponsored by it.</p>
-          <details className="advanced">
+          <details className="advanced" open={name !== 'gild' || /another name/.test(error) || undefined}>
             <summary className="dim small">Advanced</summary>
             <label htmlFor="name">Worker name</label>
             <input id="name" value={name} onChange={e => setName(slug(e.target.value) || 'gild')} />
@@ -147,7 +147,7 @@ export function Setup({ onInstalled }: { onInstalled(instance: Instance): void }
           {error && (<>
             <p className="error" role="alert">{error}</p>
             <div className="row">
-              <button className="ghost" onClick={() => setStage('owner')}>Back</button>
+              <button className="ghost" onClick={() => setStage('owner')}>{/another name/.test(error) ? 'Choose a name' : 'Back'}</button>
               <button className="primary" onClick={() => run()} disabled={busy}>Try again</button>
             </div>
             <p className="dim small">Running it again picks up where it stopped; nothing is created twice.</p>

@@ -54,7 +54,10 @@ export async function openExternal(url: string) {
 
 export interface Identity { name: string | null; email: string | null; public_key: string | null; gild_name: string | null; key_path: string }
 
-export interface Instance { url: string; owner: string; token: string; account_id: string; name: string; version: string }
+export interface Instance { url: string; owner: string; token: string; account_id: string; name: string; version: string; agents?: 'vm' | 'host' }
+
+/** Whether agents can run in a VM here: Multipass on macOS and Windows, Firecracker (KVM) on Linux. */
+export interface VmStatus { backend: 'multipass' | 'firecracker'; ready: boolean; found: string | null }
 
 async function invoke<T>(command: string, args?: Record<string, unknown>): Promise<T> {
   const { invoke } = await import('@tauri-apps/api/core')
@@ -71,3 +74,4 @@ export const readInstance = () => (inTauri() ? invoke<Instance | null>('instance
 export const writeInstance = (instance: Instance) =>
   inTauri() ? invoke<void>('instance_write', { instance }) : dev<void>('/instance', { method: 'PUT', body: JSON.stringify(instance) })
 export const forgetInstance = () => (inTauri() ? invoke<void>('instance_forget') : dev<void>('/instance', { method: 'DELETE' }))
+export const vmStatus = () => (inTauri() ? invoke<VmStatus>('vm_status') : dev<VmStatus>('/vm'))

@@ -1,4 +1,5 @@
 mod local;
+mod vm;
 
 pub fn run() {
     tauri::Builder::default()
@@ -11,6 +12,7 @@ pub fn run() {
             local::instance_read,
             local::instance_write,
             local::instance_forget,
+            vm::vm_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running gild desktop");

@@ -4,7 +4,7 @@ Your own [gild](https://gild.gg), the git forge for agents, in your own
 Cloudflare account.
 
 Setup is two things: a **Workers Paid** plan and a **Cloudflare API token**.
-Paste the token and gild desktop installs gild into your account, makes you its
+Paste the token and gild desktop sets up gild in your account, makes you its
 owner, and opens it. Your repositories live in Cloudflare Artifacts, served by
 a Worker you own.
 
@@ -12,7 +12,7 @@ macOS and Linux. Windows is coming.
 
 ## What it does
 
-**Install.** One token, about a minute. The installer is
+**Set up.** One token, about a minute. The setup code is
 [`@gildforge/kit/install`](https://github.com/gildforge/kit/tree/main/src/install).
 It runs these steps in order:
 
@@ -114,7 +114,7 @@ CLOUDFLARE_API_TOKEN=… npx -p @gildforge/kit gild-install <account-id> <owner>
 | `src/app` | A Next.js app, exported as static files (`output: 'export'`) and served by Tauri. |
 | `src/lib/platform.ts` | The seam to the machine: Tauri's HTTP client (no CORS) and WebSocket (with an Authorization header), your git identity and SSH key, and the saved instance. |
 | `src/lib/gild.ts` | The instance, reached through the kit's typed API client (`@gildforge/kit/engine/api/client`). |
-| `scripts/template.mjs` | Copies the kit's install template (the prebuilt Worker, its manifest and the migrations) into the app at build time. The pinned kit version is the gild version this desktop installs. |
+| `scripts/template.mjs` | Copies the kit's install template (the prebuilt Worker, its manifest and the migrations) into the app at build time. The pinned kit version is the gild version this desktop sets up. |
 | `src-tauri` | The Rust shell. It reads (or creates, in the CLI's format) your gild identity and keeps the instance in `~/Library/Application Support/gg.gild.desktop/instance.json` on macOS, or `~/.config/gg.gild.desktop/instance.json` on Linux (mode 0600). |
 
 ## License

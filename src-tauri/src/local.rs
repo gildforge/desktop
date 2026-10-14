@@ -97,6 +97,9 @@ pub struct Instance {
     account_id: String,
     name: String,
     version: String,
+    /// Where agents run: "vm" or "host" (the person skipped agent VMs).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    agents: Option<String>,
 }
 
 fn instance_path() -> Result<PathBuf, String> {

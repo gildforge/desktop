@@ -1,0 +1,29 @@
+[package]
+name = "gild-desktop"
+version = "0.1.0"
+description = "gild desktop: install gild into your own Cloudflare account and work in it"
+license = "Apache-2.0"
+repository = "https://github.com/gildforge/desktop"
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "gild_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6.3", features = [] }
+
+[dependencies]
+tauri = { version = "2.11.6", features = [] }
+# The installer talks to api.cloudflare.com and the instance from the window;
+# the webview's own fetch would be stopped by CORS.
+tauri-plugin-http = { version = "2", features = ["multipart"] }
+# The Agents channel streams over a WebSocket that needs an Authorization
+# header, which a webview's WebSocket cannot send.
+tauri-plugin-websocket = "2"
+tauri-plugin-opener = "2"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+dirs = "6"
+

@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+public/template/
+src-tauri/target/
+src-tauri/gen/
+.tmp/
+*.tsbuildinfo
+next-env.d.ts
+.target/

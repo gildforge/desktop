@@ -1,5 +1,5 @@
 'use client'
-// First run: one Cloudflare API token installs gild into the user's own
+// First run: one Cloudflare API token sets up gild in the user's own
 // account (the kit's installer, step by step), and they become its owner.
 import { useEffect, useState } from 'react'
 import { accounts, install, STEPS, type Account, type Progress, type StepId } from '@gildforge/kit/install/index'
@@ -86,7 +86,7 @@ export function Setup({ onInstalled }: { onInstalled(instance: Instance): void }
       <ol className="stages" aria-label="Setup">
         <li data-on={stage === 'token'} data-done={stage !== 'token'}>API token</li>
         <li data-on={stage === 'owner'} data-done={stage === 'install' || stage === 'vms'}>Owner</li>
-        <li data-on={stage === 'install'} data-done={stage === 'vms'}>Install</li>
+        <li data-on={stage === 'install'} data-done={stage === 'vms'}>Set up</li>
         <li data-on={stage === 'vms'}>Agent VMs</li>
       </ol>
 
@@ -133,13 +133,13 @@ export function Setup({ onInstalled }: { onInstalled(instance: Instance): void }
           </details>
           <div className="row">
             <button type="button" className="ghost" onClick={() => setStage('token')}>Back</button>
-            <button className="primary" disabled={!owner || !email || !slug(name) || !me?.public_key}>Install gild</button>
+            <button className="primary" disabled={!owner || !email || !slug(name) || !me?.public_key}>Set up gild</button>
           </div>
         </form>
       )}
 
       {stage === 'install' && (
-        <section className="card" aria-label="Install progress">
+        <section className="card" aria-label="Setup progress">
           <ol className="steps">
             {STEPS.map(s => {
               const p = steps[s.id]
@@ -158,7 +158,7 @@ export function Setup({ onInstalled }: { onInstalled(instance: Instance): void }
             <div className="row">
               <button className="ghost" onClick={() => setStage('owner')}>{/another name/.test(error) ? 'Choose a name' : 'Back'}</button>
               {/another name/.test(error)
-                ? <button className="primary" onClick={() => run(undefined, nextName(slug(name)))} disabled={busy}>Install as {nextName(slug(name))}</button>
+                ? <button className="primary" onClick={() => run(undefined, nextName(slug(name)))} disabled={busy}>Set up as {nextName(slug(name))}</button>
                 : <button className="primary" onClick={() => run()} disabled={busy}>Try again</button>}
             </div>
             <p className="dim small">Running it again picks up where it stopped; nothing is created twice.</p>
@@ -192,7 +192,7 @@ function AgentVms({ onDone }: { onDone(agents: 'vm' | 'host'): void }) {
         <p className="dim small">Install it from the download page, or in Terminal with <code>brew install --cask multipass</code>. It asks for your password because it runs a small background service. Then check again.</p>
         <div className="row"><button type="button" className="ghost small" onClick={() => openExternal('https://canonical.com/multipass/install')}>Open the Multipass download page</button></div>
       </>)}
-      {status?.ready && <p className="dim small">Agents start in the VM with <code>gild spawn --vm</code> or <code>gild agent launch --vm</code>. Sign Claude Code in for VMs once with <code>gild vm login claude</code>. The first VM takes about two minutes to make.</p>}
+      {status?.ready && <p className="dim small">Agents start in the VM with <code>gild spawn --vm</code> or <code>gild agent launch --vm</code>. Sign Claude Code in for VMs once with <code>gild vm login claude</code>. The first VM takes a few minutes to make.</p>}
       <div className="row">
         <button type="button" className="ghost" onClick={() => onDone('host')}>Skip: run agents on this computer</button>
         {status && !status.ready && <button type="button" className="ghost" onClick={check}>Check again</button>}

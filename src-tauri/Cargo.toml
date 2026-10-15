@@ -1,6 +1,6 @@
 [package]
 name = "gild-desktop"
-version = "0.1.2"
+version = "0.1.3"
 description = "gild desktop: install gild into your own Cloudflare account and work in it"
 license = "Apache-2.0"
 repository = "https://github.com/gildforge/desktop"
